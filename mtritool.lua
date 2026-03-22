@@ -1,12 +1,11 @@
--- ==================== MINH TRÍ TRÙM TOOL UI ====================
--- Tạo UI đẹp ngầu với nhiều hiệu ứng
+-- ==================== MINH TRÍ TRÙM TOOL - 7 MÀU GÓC PHẢI ====================
+-- Chữ nhỏ, không thể tương tác, hiệu ứng 7 màu đẹp mắt
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
--- Tạo ScreenGui
+-- Tạo ScreenGui (không chặn tương tác game)
 local gui = Instance.new("ScreenGui")
 gui.Name = "MinhTriTool"
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -14,47 +13,28 @@ gui.IgnoreGuiInset = true
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- ==================== BACKGROUND CHÍNH ====================
+-- ==================== FRAME CHÍNH ====================
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 320, 0, 70)
-mainFrame.Position = UDim2.new(0.01, 0, 0.02, 0)  -- Góc trên trái
+mainFrame.Size = UDim2.new(0, 140, 0, 28)  -- Nhỏ gọn
+mainFrame.Position = UDim2.new(1, -150, 0.02, 0)  -- Góc trên bên phải
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BackgroundTransparency = 0.15
+mainFrame.BackgroundTransparency = 0.3  -- Trong suốt nhẹ
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = false
 mainFrame.Parent = gui
 
--- Bo góc
+-- **QUAN TRỌNG: Không cho phép bấm vào**
+mainFrame.Active = false
+mainFrame.Selectable = false
+mainFrame.Interactable = false
+
+-- Bo góc nhẹ
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 15)
+corner.CornerRadius = UDim.new(0, 8)
 corner.Parent = mainFrame
 
--- Viền sáng (glow effect)
-local glowBorder = Instance.new("Frame")
-glowBorder.Name = "GlowBorder"
-glowBorder.Size = UDim2.new(1, 4, 1, 4)
-glowBorder.Position = UDim2.new(-0.01, 0, -0.01, 0)
-glowBorder.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
-glowBorder.BackgroundTransparency = 0.7
-glowBorder.BorderSizePixel = 0
-glowBorder.Parent = mainFrame
-
-local glowCorner = Instance.new("UICorner")
-glowCorner.CornerRadius = UDim.new(0, 18)
-glowCorner.Parent = glowBorder
-
--- ==================== HIỆU ỨNG GRADIENT ====================
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 40)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 180, 60)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 40))
-})
-gradient.Rotation = 45
-gradient.Parent = mainFrame
-
--- ==================== CHỮ CHÍNH ====================
+-- ==================== CHỮ CHÍNH 7 MÀU ====================
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "TitleLabel"
 titleLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -63,59 +43,116 @@ titleLabel.Text = "MINH TRÍ TRÙM TOOL"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextStrokeTransparency = 0.5
-titleLabel.TextStrokeColor3 = Color3.fromRGB(255, 100, 50)
+titleLabel.TextStrokeTransparency = 0.4
+titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 titleLabel.Parent = mainFrame
 
--- ==================== HIỆU ỨNG SHADOW ====================
-local shadow = Instance.new("Frame")
-shadow.Name = "Shadow"
-shadow.Size = UDim2.new(1, 8, 1, 8)
-shadow.Position = UDim2.new(-0.02, 0, -0.02, 0)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.8
-shadow.BorderSizePixel = 0
-shadow.ZIndex = -1
-shadow.Parent = mainFrame
+-- **Không cho bấm vào chữ**
+titleLabel.Active = false
+titleLabel.Selectable = false
 
-local shadowCorner = Instance.new("UICorner")
-shadowCorner.CornerRadius = UDim.new(0, 18)
-shadowCorner.Parent = shadow
+-- ==================== HIỆU ỨNG 7 MÀU CHUYỂN ĐỘNG ====================
+-- Tạo gradient 7 màu
+local gradient = Instance.new("UIGradient")
+gradient.Rotation = 90
+gradient.Parent = mainFrame
 
--- ==================== HIỆU ỨNG PARTICLE (HẠT SÁNG) ====================
+-- Mảng 7 màu RGB đẹp
+local colors = {
+    Color3.fromRGB(255, 80, 80),   -- Đỏ
+    Color3.fromRGB(255, 160, 80),  -- Cam
+    Color3.fromRGB(255, 255, 80),  -- Vàng
+    Color3.fromRGB(80, 255, 80),   -- Xanh lá
+    Color3.fromRGB(80, 200, 255),  -- Xanh dương
+    Color3.fromRGB(160, 80, 255),  -- Tím
+    Color3.fromRGB(255, 80, 200)   -- Hồng
+}
+
+-- Tạo hiệu ứng chuyển màu liên tục
+local colorIndex = 1
+local tweenColor = nil
+
+local function updateGradient()
+    local color1 = colors[colorIndex]
+    local color2 = colors[colorIndex % 7 + 1]
+    
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, color1),
+        ColorSequenceKeypoint.new(0.5, color2),
+        ColorSequenceKeypoint.new(1, color1)
+    })
+    
+    colorIndex = colorIndex % 7 + 1
+end
+
+-- Chạy hiệu ứng chuyển màu
+spawn(function()
+    while gui.Parent do
+        updateGradient()
+        task.wait(0.8)  -- Mỗi 0.8 giây đổi màu
+    end
+end)
+
+-- ==================== HIỆU ỨNG GLOW NHẸ ====================
+local glowFrame = Instance.new("Frame")
+glowFrame.Size = UDim2.new(1, 6, 1, 6)
+glowFrame.Position = UDim2.new(-0.02, 0, -0.02, 0)
+glowFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+glowFrame.BackgroundTransparency = 0.6
+glowFrame.BorderSizePixel = 0
+glowFrame.Active = false
+glowFrame.Selectable = false
+glowFrame.Parent = mainFrame
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 10)
+glowCorner.Parent = glowFrame
+
+-- Hiệu ứng glow nhấp nháy nhẹ
+spawn(function()
+    while gui.Parent do
+        for i = 0, 1, 0.05 do
+            local alpha = 0.5 + math.sin(i * math.pi) * 0.2
+            glowFrame.BackgroundTransparency = 0.5 + math.sin(i * math.pi) * 0.3
+            task.wait(0.03)
+        end
+        task.wait(0.5)
+    end
+end)
+
+-- ==================== HIỆU ỨNG HẠT SÁNG NHỎ ====================
 local particleContainer = Instance.new("Frame")
-particleContainer.Name = "ParticleContainer"
 particleContainer.Size = UDim2.new(1, 0, 1, 0)
 particleContainer.BackgroundTransparency = 1
+particleContainer.Active = false
 particleContainer.Parent = mainFrame
 
--- Hàm tạo hạt sáng
 local function createParticle()
     local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-    particle.Position = UDim2.new(math.random() * 0.8 + 0.1, 0, math.random() * 0.8 + 0.1, 0)
-    particle.BackgroundColor3 = Color3.fromRGB(255, math.random(100, 200), math.random(50, 100))
-    particle.BackgroundTransparency = 0.3
+    particle.Size = UDim2.new(0, math.random(1, 2), 0, math.random(1, 2))
+    particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    particle.BackgroundColor3 = colors[math.random(1, 7)]
+    particle.BackgroundTransparency = 0.2
     particle.BorderSizePixel = 0
+    particle.Active = false
     particle.Parent = particleContainer
     
     local particleCorner = Instance.new("UICorner")
     particleCorner.CornerRadius = UDim.new(1, 0)
     particleCorner.Parent = particle
     
-    -- Hiệu ứng di chuyển
-    local directionX = (math.random() - 0.5) * 2
-    local directionY = (math.random() - 0.5) * 2
+    local directionX = (math.random() - 0.5) * 0.5
+    local directionY = (math.random() - 0.5) * 0.5
     
     local tween = TweenService:Create(
         particle,
-        TweenInfo.new(math.random(2, 5), Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1, false, 0),
+        TweenInfo.new(math.random(2, 4), Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
         {
             Position = UDim2.new(
-                particle.Position.X.Scale + directionX * 0.2,
-                particle.Position.X.Offset + directionX * 20,
-                particle.Position.Y.Scale + directionY * 0.2,
-                particle.Position.Y.Offset + directionY * 20
+                particle.Position.X.Scale + directionX,
+                particle.Position.X.Offset,
+                particle.Position.Y.Scale + directionY,
+                particle.Position.Y.Offset
             ),
             BackgroundTransparency = 1
         }
@@ -127,161 +164,21 @@ local function createParticle()
     end)
 end
 
--- Tạo particle liên tục
+-- Tạo hạt sáng thưa hơn (tránh lag trên điện thoại)
 spawn(function()
     while gui.Parent do
-        task.wait(0.1)
-        if mainFrame.Visible then
-            pcall(createParticle)
-        end
+        task.wait(0.3)
+        pcall(createParticle)
     end
 end)
 
--- ==================== HIỆU ỨNG GLOW PULSE (NHẤP NHÁY) ====================
-spawn(function()
-    local glowFrame = Instance.new("Frame")
-    glowFrame.Size = UDim2.new(1, 10, 1, 10)
-    glowFrame.Position = UDim2.new(-0.02, 0, -0.02, 0)
-    glowFrame.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
-    glowFrame.BackgroundTransparency = 0.8
-    glowFrame.BorderSizePixel = 0
-    glowFrame.Parent = mainFrame
-    
-    local glowCornerFrame = Instance.new("UICorner")
-    glowCornerFrame.CornerRadius = UDim.new(0, 20)
-    glowCornerFrame.Parent = glowFrame
-    
-    while gui.Parent do
-        -- Hiệu ứng phồng lên xẹp xuống
-        for i = 0, 1, 0.05 do
-            local alpha = 0.5 + math.sin(i * math.pi) * 0.3
-            glowFrame.BackgroundTransparency = 0.6 + math.sin(i * math.pi) * 0.3
-            glowFrame.Size = UDim2.new(1, 8 + math.sin(i * math.pi) * 4, 1, 8 + math.sin(i * math.pi) * 4)
-            task.wait(0.02)
-        end
-        task.wait(0.5)
-    end
-end)
+-- ==================== HIỆU ỨNG FADE IN KHI MỚI VÀO ====================
+mainFrame.BackgroundTransparency = 1
+titleLabel.TextTransparency = 1
+glowFrame.BackgroundTransparency = 1
 
--- ==================== HIỆU ỨNG TYPERWRITER (CHỮ CHẠY) ====================
-local fullText = "MINH TRÍ TRÙM TOOL"
-titleLabel.Text = ""
+TweenService:Create(mainFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0.3}):Play()
+TweenService:Create(titleLabel, TweenInfo.new(0.8), {TextTransparency = 0}):Play()
+TweenService:Create(glowFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0.6}):Play()
 
-spawn(function()
-    task.wait(0.5)
-    for i = 1, #fullText do
-        titleLabel.Text = string.sub(fullText, 1, i)
-        -- Hiệu ứng rung nhẹ
-        local originalPos = mainFrame.Position
-        local shakeTween = TweenService:Create(
-            mainFrame,
-            TweenInfo.new(0.05, Enum.EasingStyle.Linear),
-            {Position = UDim2.new(originalPos.X.Scale, math.random(-1, 1), originalPos.Y.Scale, math.random(-1, 1))}
-        )
-        shakeTween:Play()
-        shakeTween.Completed:Connect(function()
-            TweenService:Create(mainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = originalPos}):Play()
-        end)
-        task.wait(0.08)
-    end
-end)
-
--- ==================== HIỆU ỨNG RGB CHUYỂN MÀU ====================
-spawn(function()
-    local hue = 0
-    while gui.Parent do
-        hue = (hue + 0.005) % 1
-        local color = Color3.fromHSV(hue, 1, 1)
-        gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, color),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 180, 60)),
-            ColorSequenceKeypoint.new(1, color)
-        })
-        task.wait(0.05)
-    end
-end)
-
--- ==================== HIỆU ỨNG CHUYỂN ĐỘNG NHẸ ====================
-local moveUp = true
-spawn(function()
-    while gui.Parent do
-        local targetPos
-        if moveUp then
-            targetPos = UDim2.new(0.01, 0, 0.018, 0)
-        else
-            targetPos = UDim2.new(0.01, 0, 0.022, 0)
-        end
-        
-        local moveTween = TweenService:Create(
-            mainFrame,
-            TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-            {Position = targetPos}
-        )
-        moveTween:Play()
-        moveTween.Completed:Wait()
-        moveUp = not moveUp
-        task.wait(0.5)
-    end
-end)
-
--- ==================== HIỆU ỨNG KHI HOVER CHUỘT ====================
-mainFrame.MouseEnter:Connect(function()
-    local hoverTween = TweenService:Create(
-        mainFrame,
-        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-        {Size = UDim2.new(0, 340, 0, 75)}
-    )
-    hoverTween:Play()
-    
-    local glowTween = TweenService:Create(
-        glowBorder,
-        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-        {BackgroundTransparency = 0.4}
-    )
-    glowTween:Play()
-end)
-
-mainFrame.MouseLeave:Connect(function()
-    local leaveTween = TweenService:Create(
-        mainFrame,
-        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
-        {Size = UDim2.new(0, 320, 0, 70)}
-    )
-    leaveTween:Play()
-    
-    local glowTween = TweenService:Create(
-        glowBorder,
-        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
-        {BackgroundTransparency = 0.7}
-    )
-    glowTween:Play()
-end)
-
--- ==================== PHẦN PHỤ (SUB TEXT) ====================
-local subFrame = Instance.new("Frame")
-subFrame.Size = UDim2.new(0, 280, 0, 20)
-subFrame.Position = UDim2.new(0.5, -140, 1, 5)
-subFrame.BackgroundTransparency = 1
-subFrame.Parent = mainFrame
-
-local subText = Instance.new("TextLabel")
-subText.Size = UDim2.new(1, 0, 1, 0)
-subText.BackgroundTransparency = 1
-subText.Text = "✦ PREMIUM TOOL ✦"
-subText.TextColor3 = Color3.fromRGB(255, 200, 100)
-subText.TextScaled = true
-subText.Font = Enum.Font.Gotham
-subText.TextTransparency = 0.3
-subText.Parent = subFrame
-
--- Hiệu ứng chạy chữ cho sub text
-spawn(function()
-    while gui.Parent do
-        for i = 0, 1, 0.02 do
-            subText.TextTransparency = 0.3 + math.sin(i * math.pi * 2) * 0.3
-            task.wait(0.02)
-        end
-    end
-end)
-
-print("✅ Minh Trí Trùm Tool UI đã được tạo thành công!")
+print("✅ Minh Trí Trùm Tool - 7 Màu - Góc Phải - Đã tạo thành công!")
